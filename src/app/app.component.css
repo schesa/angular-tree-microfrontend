@@ -1,0 +1,13 @@
+
+.tree-area{
+    float: left;
+}
+
+.tabs-area{
+    float: right;
+}
+
+.iframe{
+    width: 800px;
+    height: 800px;
+}
