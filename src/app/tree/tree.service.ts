@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, ɵɵsetNgModuleScope } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { TreeNode } from './tree-node';
-import { Observable } from 'rxjs';
+import { NodeType } from './node-type.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +11,17 @@ export class TreeService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getTreeNodes() {
+  public getTreeNodes() {
     console.log('getTreeNodes from ' + this.configUrl);
     return this.httpClient.get<TreeNode[]>(this.configUrl);
+  }
+
+  public getTreeNodesForHost(node?: TreeNode) {
+    if (node) {
+      if (node.type == NodeType[NodeType.HOST]) {
+        console.log('get host childs from ' + this.configUrl);
+        return this.httpClient.get<TreeNode[]>(this.configUrl + "?hostId=" + node.id.toString());
+      }
+    }
   }
 }

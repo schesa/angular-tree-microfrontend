@@ -1,5 +1,5 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { TreeNode } from './tree-node';
 import { TreeService } from './tree.service';
@@ -70,24 +70,48 @@ imgMap.set(NodeType[NodeType.FAKE_SHARE], fakeShareImg);
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css']
 })
-export class TreeComponent {
+export class TreeComponent implements OnInit {
   treeControl = new NestedTreeControl<TreeNode>(node => node.childs);
   dataSource = new MatTreeNestedDataSource<TreeNode>();
 
   constructor(private treeService: TreeService) {
     console.log(NodeType[NodeType.HOST]);
-    treeService.getTreeNodes().subscribe((data) => {
+  }
+  ngOnInit(): void {
+    this.treeService.getTreeNodes().subscribe((data) => {
+      let startTime = new Date();
       this.setImg(data);
       this.dataSource.data = data;
-    });;
+      let endTime = new Date();
+      console.log(endTime.getMilliseconds()-startTime.getMilliseconds())
+    });
   }
-  
+
   hasChild = (_: number, node: TreeNode) => !!node.childs && node.childs.length > 0;
-  
+
   setImg(treeNodes: TreeNode[]): void {
     treeNodes.forEach(node => {
       node.img = imgMap.get(node.type);
       this.setImg(node.childs);
+    });
+  }
+
+  loadChilds(node: TreeNode){
+    this.treeService.getTreeNodes().subscribe().unsubscribe();
+    this.treeService.getTreeNodesForHost(node).subscribe((data) => {
+      console.log("Data from get host");
+      console.log(data);
+      this.setImg(data);
+      let dataSource = this.dataSource.data;
+      console.log(dataSource);
+      let hostNode = dataSource[this.dataSource.data.indexOf(node)];
+      console.log(hostNode);
+      let childs = dataSource[this.dataSource.data.indexOf(node)].childs;
+      data.forEach(node=>childs.push(node));
+      dataSource[this.dataSource.data.indexOf(node)].childs=childs;
+      this.dataSource.data=null;
+      this.dataSource.data = dataSource;
+      console.log(hostNode);
     });
   }
 }
